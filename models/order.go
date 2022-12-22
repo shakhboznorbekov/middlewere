@@ -2,6 +2,7 @@ package models
 
 type OrderPrimarKey struct {
 	Id string `json:"order_id"`
+	Login string `json:"login"`
 }
 
 type CreateOrder struct {
