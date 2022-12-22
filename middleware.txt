@@ -1,0 +1,8 @@
+
+
+Middleware
+
+hostname 
+        /category PUBLIC
+        /film     PUBLIC
+        /actor    PUBLIC
