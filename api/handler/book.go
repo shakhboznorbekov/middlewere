@@ -7,8 +7,9 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/gin-gonic/gin"
 	"crud/models"
+
+	"github.com/gin-gonic/gin"
 )
 
 // CreateBook godoc

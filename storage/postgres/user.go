@@ -12,17 +12,17 @@ import (
 	"crud/pkg/helper"
 )
 
-type userRepo struct {
+type UserRepo struct {
 	db *pgxpool.Pool
 }
 
-func NewUserRepo(db *pgxpool.Pool) *userRepo {
-	return &userRepo{
+func NewUserRepo(db *pgxpool.Pool) *UserRepo {
+	return &UserRepo{
 		db: db,
 	}
 }
 
-func (f *userRepo) Create(ctx context.Context, user *models.CreateUser) (string, error) {
+func (f *UserRepo) Create(ctx context.Context, user *models.CreateUser) (string, error) {
 
 	var (
 		id    = uuid.New().String()
@@ -32,20 +32,22 @@ func (f *userRepo) Create(ctx context.Context, user *models.CreateUser) (string,
 	query = `
 		INSERT INTO users(
 			user_id,
-			first_name, 
+			first_name,
 			last_name,
+			login,
+			password,
 			phone_number,
-			balance,
 			updated_at
-		) VALUES ( $1, $2 , $3, $4, $5, now())
+		) VALUES ( $1, $2, $3, $4, $5, $6, now() )
 	`
 
 	_, err := f.db.Exec(ctx, query,
 		id,
 		user.FirstName,
 		user.LastName,
+		user.Login,
+		user.Password,
 		user.PhoneNumber,
-		user.Balance,
 	)
 
 	if err != nil {
@@ -55,25 +57,38 @@ func (f *userRepo) Create(ctx context.Context, user *models.CreateUser) (string,
 	return id, nil
 }
 
-func (f *userRepo) GetByPKey(ctx context.Context, pkey *models.UserPrimarKey) (*models.User, error) {
+func (f *UserRepo) GetByPKey(ctx context.Context, pkey *models.UserPrimarKey) (*models.User, error) {
 
 	var (
-		id          sql.NullString
-		firstName   sql.NullString
-		lastName    sql.NullString
-		phoneNumber sql.NullString
-		balance     sql.NullString
-		createdAt   sql.NullString
-		updatedAt   sql.NullString
+		id           sql.NullString
+		first_name   sql.NullString
+		last_name    sql.NullString
+		login        sql.NullString
+		password     sql.NullString
+		phone_number sql.NullString
+		createdAt    sql.NullString
+		updatedAt    sql.NullString
 	)
+
+	if len(pkey.Login) > 0 {
+
+		err := f.db.QueryRow(ctx, "SELECT user_id FROM users WHERE login = $1", pkey.Login).
+			Scan(&pkey.Id)
+
+		if err != nil {
+			return nil, err
+		}
+
+	}
 
 	query := `
 		SELECT
 			user_id,
-			first_name, 
+			first_name,
 			last_name,
+			login,
+			password,
 			phone_number,
-			balance,
 			created_at,
 			updated_at
 		FROM
@@ -84,10 +99,13 @@ func (f *userRepo) GetByPKey(ctx context.Context, pkey *models.UserPrimarKey) (*
 	err := f.db.QueryRow(ctx, query, pkey.Id).
 		Scan(
 			&id,
-			&firstName,
-			&lastName,
-			&phoneNumber,
-			&balance,
+			&first_name,
+			&last_name,
+			&login,
+			&password,
+			&phone_number,
+			&createdAt,
+			&updatedAt,
 		)
 
 	if err != nil {
@@ -96,21 +114,22 @@ func (f *userRepo) GetByPKey(ctx context.Context, pkey *models.UserPrimarKey) (*
 
 	return &models.User{
 		Id:          id.String,
-		FirstName:   firstName.String,
-		LastName:    lastName.String,
-		PhoneNumber: phoneNumber.String,
-		Balance:     balance.String,
+		FirstName:   first_name.String,
+		LastName:    last_name.String,
+		Login:       login.String,
+		Password:    password.String,
+		PhoneNumber: phone_number.String,
 		CreatedAt:   createdAt.String,
 		UpdatedAt:   updatedAt.String,
 	}, nil
 }
 
-func (f *userRepo) GetList(ctx context.Context, req *models.GetListUserRequest) (*models.GetListUserResponse, error) {
+func (f *UserRepo) GetList(ctx context.Context, req *models.GetListUserRequest) (*models.GetListUserResponse, error) {
 
 	var (
 		resp   = models.GetListUserResponse{}
 		offset = " OFFSET 0"
-		limit  = " LIMIT 10"
+		limit  = " LIMIT 5"
 	)
 
 	if req.Limit > 0 {
@@ -125,8 +144,10 @@ func (f *userRepo) GetList(ctx context.Context, req *models.GetListUserRequest) 
 		SELECT
 			COUNT(*) OVER(),
 			user_id,
-			first_name, 
+			first_name,
 			last_name,
+			login,
+			password,
 			phone_number,
 			balance,
 			created_at,
@@ -142,22 +163,24 @@ func (f *userRepo) GetList(ctx context.Context, req *models.GetListUserRequest) 
 	for rows.Next() {
 
 		var (
-			id          sql.NullString
-			firstName   sql.NullString
-			lastName    sql.NullString
-			phoneNumber sql.NullString
-			balance     sql.NullString
-			createdAt   sql.NullString
-			updatedAt   sql.NullString
+			id           sql.NullString
+			first_name   sql.NullString
+			last_name    sql.NullString
+			login        sql.NullString
+			password     sql.NullString
+			phone_number sql.NullString
+			createdAt    sql.NullString
+			updatedAt    sql.NullString
 		)
 
 		err := rows.Scan(
 			&resp.Count,
 			&id,
-			&firstName,
-			&lastName,
-			&phoneNumber,
-			&balance,
+			&first_name,
+			&last_name,
+			&login,
+			&password,
+			&phone_number,
 			&createdAt,
 			&updatedAt,
 		)
@@ -168,10 +191,11 @@ func (f *userRepo) GetList(ctx context.Context, req *models.GetListUserRequest) 
 
 		resp.Users = append(resp.Users, &models.User{
 			Id:          id.String,
-			FirstName:   firstName.String,
-			LastName:    lastName.String,
-			PhoneNumber: phoneNumber.String,
-			Balance:     balance.String,
+			FirstName:   first_name.String,
+			LastName:    last_name.String,
+			Login:       login.String,
+			Password:    password.String,
+			PhoneNumber: phone_number.String,
 			CreatedAt:   createdAt.String,
 			UpdatedAt:   updatedAt.String,
 		})
@@ -181,7 +205,7 @@ func (f *userRepo) GetList(ctx context.Context, req *models.GetListUserRequest) 
 	return &resp, err
 }
 
-func (f *userRepo) Update(ctx context.Context, req *models.UpdateUser) (int64, error) {
+func (f *UserRepo) Update(ctx context.Context, req *models.UpdateUser) (int64, error) {
 
 	var (
 		query  = ""
@@ -194,8 +218,9 @@ func (f *userRepo) Update(ctx context.Context, req *models.UpdateUser) (int64, e
 		SET
 			first_name = :first_name,
 			last_name = :last_name,
+			login = :login,
+			password = :password,
 			phone_number = :phone_number,
-			balance = balance, 
 			updated_at = now()
 		WHERE user_id = :user_id
 	`
@@ -204,8 +229,9 @@ func (f *userRepo) Update(ctx context.Context, req *models.UpdateUser) (int64, e
 		"user_id":      req.Id,
 		"first_name":   req.FirstName,
 		"last_name":    req.LastName,
+		"login":        req.Login,
+		"password":     req.Password,
 		"phone_number": req.PhoneNumber,
-		"balance":      req.Balance,
 	}
 
 	query, args := helper.ReplaceQueryParams(query, params)
@@ -218,7 +244,7 @@ func (f *userRepo) Update(ctx context.Context, req *models.UpdateUser) (int64, e
 	return rowsAffected.RowsAffected(), nil
 }
 
-func (f *userRepo) Delete(ctx context.Context, req *models.UserPrimarKey) error {
+func (f *UserRepo) Delete(ctx context.Context, req *models.UserPrimarKey) error {
 
 	_, err := f.db.Exec(ctx, "DELETE FROM users WHERE user_id = $1", req.Id)
 	if err != nil {

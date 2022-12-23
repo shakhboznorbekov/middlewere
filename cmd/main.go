@@ -4,10 +4,12 @@ import (
 	"context"
 	"log"
 
-	"github.com/gin-gonic/gin"
+
 	"crud/api"
 	"crud/config"
 	"crud/storage/postgres"
+
+	"github.com/gin-gonic/gin"
 )
 
 func main() {
@@ -24,7 +26,7 @@ func main() {
 	}
 	defer storage.CloseDB()
 
-	api.SetUpApi(r, storage)
+	api.SetUpApi(&cfg,r, storage)
 
 	log.Printf("Listening port %v...\n", cfg.HTTPPort)
 	err = r.Run(cfg.HTTPPort)

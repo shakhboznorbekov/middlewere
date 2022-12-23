@@ -93,7 +93,7 @@ const docTemplate = `{
                     "201": {
                         "description": "GetBookBody",
                         "schema": {
-                            "$ref": "#/definitions/models.CreateBook"
+                            "$ref": "#/definitions/models.Book"
                         }
                     },
                     "400": {
@@ -234,6 +234,100 @@ const docTemplate = `{
                         "description": "GetBookBody",
                         "schema": {
                             "$ref": "#/definitions/models.Book"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/login": {
+            "post": {
+                "description": "Create Login",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Login"
+                ],
+                "summary": "Create Login",
+                "operationId": "login",
+                "parameters": [
+                    {
+                        "description": "LoginRequestBody",
+                        "name": "Login",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.Login"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "GetLoginBody",
+                        "schema": {
+                            "$ref": "#/definitions/models.LoginResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/loginsuper": {
+            "post": {
+                "description": "Create LoginSuper",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "LoginSuper"
+                ],
+                "summary": "Create LoginSuper",
+                "operationId": "loginsuper",
+                "parameters": [
+                    {
+                        "description": "LoginSuperRequestBody",
+                        "name": "LoginSuper",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.Login"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "GetLoginSuperBody",
+                        "schema": {
+                            "$ref": "#/definitions/models.LoginResponse"
                         }
                     },
                     "400": {
@@ -561,7 +655,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "201": {
-                        "description": "GetUserrBody",
+                        "description": "GetUserBody",
                         "schema": {
                             "$ref": "#/definitions/models.User"
                         }
@@ -648,7 +742,7 @@ const docTemplate = `{
                     },
                     {
                         "description": "CreateUserRequestBody",
-                        "name": "actor",
+                        "name": "user",
                         "in": "body",
                         "required": true,
                         "schema": {
@@ -780,13 +874,16 @@ const docTemplate = `{
         "models.CreateUser": {
             "type": "object",
             "properties": {
-                "balance": {
-                    "type": "string"
-                },
                 "first_name": {
                     "type": "string"
                 },
                 "last_name": {
+                    "type": "string"
+                },
+                "login": {
+                    "type": "string"
+                },
+                "password": {
                     "type": "string"
                 },
                 "phone_number": {
@@ -833,6 +930,25 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/models.User"
                     }
+                }
+            }
+        },
+        "models.Login": {
+            "type": "object",
+            "properties": {
+                "login": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.LoginResponse": {
+            "type": "object",
+            "properties": {
+                "access_token": {
+                    "type": "string"
                 }
             }
         },
@@ -893,19 +1009,22 @@ const docTemplate = `{
         "models.UpdateUser": {
             "type": "object",
             "properties": {
-                "balance": {
+                "first_name": {
                     "type": "string"
                 },
-                "first_name": {
+                "id": {
                     "type": "string"
                 },
                 "last_name": {
                     "type": "string"
                 },
-                "phone_number": {
+                "login": {
                     "type": "string"
                 },
-                "user_id": {
+                "password": {
+                    "type": "string"
+                },
+                "phone_number": {
                     "type": "string"
                 }
             }
@@ -913,25 +1032,28 @@ const docTemplate = `{
         "models.User": {
             "type": "object",
             "properties": {
-                "balance": {
-                    "type": "string"
-                },
                 "created_at": {
                     "type": "string"
                 },
                 "first_name": {
                     "type": "string"
                 },
+                "id": {
+                    "type": "string"
+                },
                 "last_name": {
+                    "type": "string"
+                },
+                "login": {
+                    "type": "string"
+                },
+                "password": {
                     "type": "string"
                 },
                 "phone_number": {
                     "type": "string"
                 },
                 "updated_at": {
-                    "type": "string"
-                },
-                "user_id": {
                     "type": "string"
                 }
             }
