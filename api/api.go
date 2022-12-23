@@ -28,7 +28,7 @@ func SetUpApi(cfg *config.Config, r *gin.Engine, storage storage.StorageI) {
 	r.POST("/login", handlerV1.Login)
 	r.POST("/loginsuper", handlerV1.LoginSuper)
 
-	r.POST("/refreshclienttoken")
+	
 
 	v1.Use(checkTokenSuper())
 	v2.Use(checkTokenClient())
@@ -40,7 +40,7 @@ func SetUpApi(cfg *config.Config, r *gin.Engine, storage storage.StorageI) {
 
 	r.POST("/user", handlerV1.CreateUser)
 	r.GET("/user/:id", handlerV1.GetUserById)
-	v1.GET("/user", handlerV1.GetUserList)
+	v2.GET("/user", handlerV1.GetUserList)
 	r.PUT("/user/:id", handlerV1.UpdateUser)
 	r.DELETE("/user/:id", handlerV1.DeleteUser)
 
